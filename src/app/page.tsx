@@ -120,16 +120,16 @@ const Card = ({ children, className = "", hover = false }: { children: React.Rea
 );
 
 // Stat Card Component
-const StatCard = ({ icon: Icon, title, value, subtitle, color = "blue" }: { 
-  icon: React.ElementType, 
-  title: string, 
-  value: string | number, 
+const StatCard = ({ icon: Icon, title, value, subtitle, color = "blue" }: {
+  icon: React.ElementType,
+  title: string,
+  value: string | number,
   subtitle?: string,
   color?: "blue" | "green" | "purple" | "orange" | "pink"
 }) => {
   const colorMap = {
     blue: "from-blue-500 to-cyan-500",
-    green: "from-green-500 to-emerald-500", 
+    green: "from-green-500 to-emerald-500",
     purple: "from-purple-500 to-violet-500",
     orange: "from-orange-500 to-red-500",
     pink: "from-pink-500 to-rose-500"
@@ -155,7 +155,7 @@ const StatCard = ({ icon: Icon, title, value, subtitle, color = "blue" }: {
 // Copy Button Component
 const CopyButton = ({ text }: { text: string }) => {
   const [copied, setCopied] = useState(false);
-  
+
   const handleCopy = () => {
     navigator.clipboard.writeText(text);
     setCopied(true);
@@ -174,16 +174,16 @@ const CopyButton = ({ text }: { text: string }) => {
 };
 
 // Detail Row Component with modern styling
-const DetailRow = ({ 
-  label, 
-  value, 
-  isMono = false, 
+const DetailRow = ({
+  label,
+  value,
+  isMono = false,
   isHash = false,
   copyable = false
-}: { 
-  label: string, 
-  value: string | number | null | undefined, 
-  isMono?: boolean, 
+}: {
+  label: string,
+  value: string | number | null | undefined,
+  isMono?: boolean,
   isHash?: boolean,
   copyable?: boolean
 }) => (
@@ -215,14 +215,14 @@ export default function HomePage() {
   const [isWalletLoading, setIsWalletLoading] = useState(false);
   const [isTxLoading, setIsTxLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Token pagination state
   const [currentTokenPage, setCurrentTokenPage] = useState(1);
   const tokensPerPage = 9;
-  
+
   // NFT image loading state
   const [nftImageErrors, setNftImageErrors] = useState<Set<string>>(new Set());
-  
+
   // Loading popup state
   const [showLoadingPopup, setShowLoadingPopup] = useState(false);
 
@@ -242,7 +242,7 @@ export default function HomePage() {
       if (nftProvider === 'blockvision') {
         nftEndpoint = `/api/get-nfts-blockvision?address=${address}&limit=50`;
       }
-        
+
       const [walletRes, nftRes, tokenRes, statsRes] = await Promise.all([
         fetch(`/api/check-wallet?address=${address}`),
         fetch(nftEndpoint),
@@ -319,7 +319,7 @@ export default function HomePage() {
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        
+
         {/* Loading Popup */}
         {showLoadingPopup && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
@@ -330,7 +330,7 @@ export default function HomePage() {
                   <FiKey className="w-8 h-8 text-white" />
                 </div>
               </div>
-              
+
               {/* Loading Text */}
               <div className="space-y-3">
                 <h3 className="text-xl font-bold text-white mb-2">
@@ -345,12 +345,12 @@ export default function HomePage() {
                   </p>
                 </div>
               </div>
-              
+
               {/* Loading Dots */}
               <div className="flex justify-center gap-1 mt-6">
                 <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
-                <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
-                <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
               </div>
             </div>
           </div>
@@ -361,13 +361,13 @@ export default function HomePage() {
             <span className="w-2 h-2 bg-green-400 rounded-full mr-3 animate-pulse"></span>
             <span className="text-sm font-medium text-blue-300">Live on Monad Testnet</span>
           </div>
-          
+
           <h1 className="text-4xl sm:text-6xl font-bold text-white mb-6">
             Explore <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">JAV</span>nad ( Java Monad )
           </h1>
-          
+
           <p className="text-xl text-gray-400 max-w-2xl mx-auto mb-8">
-            Powerful on-chain analytics and exploration tools for the Monad testnet. 
+            Powerful on-chain analytics and exploration tools for the Monad testnet.
             Discover wallets, transactions, tokens, and NFTs with ease.
           </p>
 
@@ -397,11 +397,10 @@ export default function HomePage() {
                   setError(null);
                   setTxInfo(null);
                 }}
-                className={`px-6 py-3 rounded-xl font-semibold transition-all duration-200 flex items-center gap-3 ${
-                  activeTab === 'wallet'
+                className={`px-6 py-3 rounded-xl font-semibold transition-all duration-200 flex items-center gap-3 ${activeTab === 'wallet'
                     ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg'
                     : 'text-gray-400 hover:text-gray-200 hover:bg-white/5'
-                }`}
+                  }`}
               >
                 <FiKey className="w-5 h-5" />
                 Wallet Explorer
@@ -412,14 +411,13 @@ export default function HomePage() {
                   setError(null);
                   // Keep wallet data when switching tabs
                 }}
-                className={`px-6 py-3 rounded-xl font-semibold transition-all duration-200 flex items-center gap-3 ${
-                  activeTab === 'transaction'
+                className={`px-6 py-3 rounded-xl font-semibold transition-all duration-200 flex items-center gap-3 ${activeTab === 'transaction'
                     ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg'
                     : 'text-gray-400 hover:text-gray-200 hover:bg-white/5'
-                }`}
+                  }`}
               >
                 <FiActivity className="w-5 h-5" />
-                Transaction Lookup
+                Transaction Hash
               </button>
             </div>
           </Card>
@@ -436,7 +434,7 @@ export default function HomePage() {
                 <h2 className="text-2xl font-bold text-white mb-2">Wallet Address</h2>
                 <p className="text-gray-400">Enter any Ethereum address to explore wallet details</p>
               </div>
-              
+
               <div className="space-y-4">
                 <div className="relative">
                   <input
@@ -447,7 +445,7 @@ export default function HomePage() {
                     className="w-full p-4 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm text-white placeholder-gray-500"
                   />
                 </div>
-                
+
                 <button
                   onClick={handleCheckWallet}
                   disabled={isWalletLoading || !address}
@@ -465,7 +463,7 @@ export default function HomePage() {
                     </>
                   )}
                 </button>
-                
+
                 <p className="text-xs text-gray-500 text-center">
                   Example: 0x316eEF7088c434F8DB78FfeCf312F60e3A710879 (65 tokens)
                 </p>
@@ -480,7 +478,7 @@ export default function HomePage() {
                 <h2 className="text-2xl font-bold text-white mb-2">Transaction Hash</h2>
                 <p className="text-gray-400">Look up any transaction on Monad testnet</p>
               </div>
-              
+
               <div className="space-y-4">
                 <input
                   type="text"
@@ -489,7 +487,7 @@ export default function HomePage() {
                   placeholder="0x..."
                   className="w-full p-4 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent font-mono text-sm text-white placeholder-gray-500"
                 />
-                
+
                 <button
                   onClick={handleCheckTx}
                   disabled={isTxLoading || !txHash}
@@ -583,7 +581,7 @@ export default function HomePage() {
                   </div>
                   <h3 className="text-xl font-bold text-white">Wallet Details</h3>
                 </div>
-                
+
                 <Card className="divide-y divide-white/10">
                   <DetailRow label="Current Balance" value={`${parseFloat(walletInfo.balance).toFixed(6)} MON`} isMono />
                   <DetailRow label="Transaction Count" value={walletInfo.txCount} copyable />
@@ -763,14 +761,13 @@ export default function HomePage() {
                             />
                           )}
                           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                          
+
                           {/* Badges */}
                           <div className="absolute top-2 right-2 flex gap-1">
-                            <span className={`px-2 py-1 text-xs rounded-full font-medium backdrop-blur-sm ${
-                              nftProvider === 'blockvision' 
-                                ? 'bg-blue-500/80 text-white' 
+                            <span className={`px-2 py-1 text-xs rounded-full font-medium backdrop-blur-sm ${nftProvider === 'blockvision'
+                                ? 'bg-blue-500/80 text-white'
                                 : 'bg-purple-500/80 text-white'
-                            }`}>
+                              }`}>
                               {nftProvider === 'blockvision' ? 'BV' : 'AL'}
                             </span>
                             {nft.verified && (
@@ -780,7 +777,7 @@ export default function HomePage() {
                             )}
                           </div>
                         </div>
-                        
+
                         <div className="p-4">
                           <h4 className="font-semibold text-white text-sm truncate mb-1">
                             {nft.title || nft.name || nft.collectionName || 'Untitled NFT'}
@@ -865,11 +862,10 @@ export default function HomePage() {
                   <Card className="p-6">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4">
-                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                          txInfo.status === 'Success' 
-                            ? 'bg-green-500/20 text-green-400' 
+                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${txInfo.status === 'Success'
+                            ? 'bg-green-500/20 text-green-400'
                             : 'bg-red-500/20 text-red-400'
-                        }`}>
+                          }`}>
                           <span className="text-2xl">
                             {txInfo.status === 'Success' ? '✓' : '✗'}
                           </span>
