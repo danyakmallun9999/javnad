@@ -13,8 +13,58 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Monad Testnet Explorer",
-  description: "Alat untuk melihat data on-chain dari jaringan Monad Testnet - cek wallet, transaksi, NFT dan token",
+  title: "JAVnad - Monad Testnet Explorer",
+  description: "Powerful on-chain analytics and exploration tools for the Monad testnet. Discover wallets, transactions, tokens, and NFTs with ease.",
+  keywords: ["Monad", "blockchain", "explorer", "wallet", "NFT", "tokens", "testnet", "crypto", "analytics"],
+  authors: [{ name: "IPVDAN", url: "https://twitter.com/ipvdan" }],
+  creator: "IPVDAN",
+  publisher: "JAVnad",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  metadataBase: new URL('https://javnad.vercel.app'), // Update with your actual domain
+  alternates: {
+    canonical: '/',
+  },
+  openGraph: {
+    title: "JAVnad - On-chain analytics",
+    description: "Powerful on-chain analytics and exploration tools for the Monad testnet. Discover wallets, transactions, tokens, and NFTs with ease.",
+    url: 'https://javnad.vercel.app', // Update with your actual domain
+    siteName: 'JAVnad',
+    images: [
+      {
+        url: '/images/javnad.png',
+        width: 1200,
+        height: 630,
+        alt: 'JAVnad - On-chain analytics',
+      },
+    ],
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: "JAVnad - On-chain analytics",
+    description: "Powerful on-chain analytics and exploration tools for the Monad testnet. Discover wallets, transactions, tokens, and NFTs with ease.",
+    creator: '@ipvdan',
+    images: ['/images/javnad.png'],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  verification: {
+    google: 'your-google-verification-code', // Add if you have Google Search Console
+  },
 };
 
 export default function RootLayout({
