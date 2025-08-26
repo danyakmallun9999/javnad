@@ -1,5 +1,5 @@
 // File: src/components/WalletStatsCard.tsx
-// Modern wallet statistics cards component
+// Modern wallet statistics cards component with glass morphism design
 
 import React from 'react';
 import { FiTrendingUp, FiTrendingDown, FiActivity, FiClock, FiZap, FiDollarSign, FiLayers, FiImage, FiSettings, FiBarChart } from 'react-icons/fi';
@@ -61,60 +61,68 @@ interface WalletStats {
 
 const colorClasses = {
   blue: {
-    bg: 'bg-gradient-to-br from-blue-50 to-blue-100/50',
-    border: 'border-blue-200/50',
-    icon: 'text-blue-600',
-    text: 'text-blue-700',
-    trend: 'text-blue-600'
+    bg: 'from-blue-500/10 to-cyan-500/10',
+    border: 'border-blue-500/20',
+    iconBg: 'from-blue-500/20 to-cyan-500/20',
+    icon: 'text-blue-400',
+    text: 'text-blue-300',
+    value: 'text-white'
   },
   green: {
-    bg: 'bg-gradient-to-br from-emerald-50 to-emerald-100/50',
-    border: 'border-emerald-200/50',
-    icon: 'text-emerald-600',
-    text: 'text-emerald-700',
-    trend: 'text-emerald-600'
+    bg: 'from-green-500/10 to-emerald-500/10',
+    border: 'border-green-500/20',
+    iconBg: 'from-green-500/20 to-emerald-500/20',
+    icon: 'text-green-400',
+    text: 'text-green-300',
+    value: 'text-white'
   },
   purple: {
-    bg: 'bg-gradient-to-br from-purple-50 to-purple-100/50',
-    border: 'border-purple-200/50',
-    icon: 'text-purple-600',
-    text: 'text-purple-700',
-    trend: 'text-purple-600'
+    bg: 'from-purple-500/10 to-violet-500/10',
+    border: 'border-purple-500/20',
+    iconBg: 'from-purple-500/20 to-violet-500/20',
+    icon: 'text-purple-400',
+    text: 'text-purple-300',
+    value: 'text-white'
   },
   orange: {
-    bg: 'bg-gradient-to-br from-orange-50 to-orange-100/50',
-    border: 'border-orange-200/50',
-    icon: 'text-orange-600',
-    text: 'text-orange-700',
-    trend: 'text-orange-600'
+    bg: 'from-orange-500/10 to-red-500/10',
+    border: 'border-orange-500/20',
+    iconBg: 'from-orange-500/20 to-red-500/20',
+    icon: 'text-orange-400',
+    text: 'text-orange-300',
+    value: 'text-white'
   },
   pink: {
-    bg: 'bg-gradient-to-br from-pink-50 to-pink-100/50',
-    border: 'border-pink-200/50',
-    icon: 'text-pink-600',
-    text: 'text-pink-700',
-    trend: 'text-pink-600'
+    bg: 'from-pink-500/10 to-rose-500/10',
+    border: 'border-pink-500/20',
+    iconBg: 'from-pink-500/20 to-rose-500/20',
+    icon: 'text-pink-400',
+    text: 'text-pink-300',
+    value: 'text-white'
   },
   teal: {
-    bg: 'bg-gradient-to-br from-teal-50 to-teal-100/50',
-    border: 'border-teal-200/50',
-    icon: 'text-teal-600',
-    text: 'text-teal-700',
-    trend: 'text-teal-600'
+    bg: 'from-teal-500/10 to-cyan-500/10',
+    border: 'border-teal-500/20',
+    iconBg: 'from-teal-500/20 to-cyan-500/20',
+    icon: 'text-teal-400',
+    text: 'text-teal-300',
+    value: 'text-white'
   },
   indigo: {
-    bg: 'bg-gradient-to-br from-indigo-50 to-indigo-100/50',
-    border: 'border-indigo-200/50',
-    icon: 'text-indigo-600',
-    text: 'text-indigo-700',
-    trend: 'text-indigo-600'
+    bg: 'from-indigo-500/10 to-blue-500/10',
+    border: 'border-indigo-500/20',
+    iconBg: 'from-indigo-500/20 to-blue-500/20',
+    icon: 'text-indigo-400',
+    text: 'text-indigo-300',
+    value: 'text-white'
   },
   rose: {
-    bg: 'bg-gradient-to-br from-rose-50 to-rose-100/50',
-    border: 'border-rose-200/50',
-    icon: 'text-rose-600',
-    text: 'text-rose-700',
-    trend: 'text-rose-600'
+    bg: 'from-rose-500/10 to-pink-500/10',
+    border: 'border-rose-500/20',
+    iconBg: 'from-rose-500/20 to-pink-500/20',
+    icon: 'text-rose-400',
+    text: 'text-rose-300',
+    value: 'text-white'
   }
 };
 
@@ -122,31 +130,41 @@ function StatsCard({ title, value, subtitle, trend, icon, color }: StatsCardProp
   const colors = colorClasses[color];
   
   return (
-    <div className={`${colors.bg} ${colors.border} border rounded-2xl p-6 hover:shadow-lg transition-all duration-300 hover:scale-[1.02]`}>
-      <div className="flex items-start justify-between mb-4">
-        <div className={`${colors.icon} p-3 rounded-xl bg-white/50`}>
-          {icon}
+    <div className={`
+      bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-6 
+      hover:bg-white/8 hover:border-white/20 hover:scale-[1.02] 
+      transition-all duration-300 group relative overflow-hidden
+      bg-gradient-to-br ${colors.bg}
+    `}>
+      {/* Subtle gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] to-transparent pointer-events-none"></div>
+      
+      <div className="flex items-start justify-between mb-4 relative">
+        <div className={`p-3 rounded-xl bg-gradient-to-r ${colors.iconBg} group-hover:scale-110 transition-transform duration-200`}>
+          <div className={`${colors.icon}`}>
+            {icon}
+          </div>
         </div>
         {trend && (
           <div className="flex items-center gap-1 text-sm">
             {trend.isPositive !== false ? (
-              <FiTrendingUp className="w-4 h-4 text-green-500" />
+              <FiTrendingUp className="w-4 h-4 text-green-400" />
             ) : (
-              <FiTrendingDown className="w-4 h-4 text-red-500" />
+              <FiTrendingDown className="w-4 h-4 text-red-400" />
             )}
-            <span className={trend.isPositive !== false ? 'text-green-600' : 'text-red-600'}>
-              +{trend.value}
+            <span className={trend.isPositive !== false ? 'text-green-400' : 'text-red-400'}>
+              {trend.isPositive !== false ? '+' : ''}{trend.value}
             </span>
             <span className="text-gray-500 text-xs">{trend.period}</span>
           </div>
         )}
       </div>
       
-      <div className="space-y-1">
-        <h3 className="text-sm font-medium text-gray-600">{title}</h3>
-        <p className={`text-2xl font-bold ${colors.text}`}>{value}</p>
+      <div className="space-y-1 relative">
+        <h3 className="text-sm font-medium text-slate-400 group-hover:text-slate-300 transition-colors">{title}</h3>
+        <p className={`text-2xl font-bold ${colors.value} group-hover:text-white transition-colors`}>{value}</p>
         {subtitle && (
-          <p className="text-sm text-gray-500">{subtitle}</p>
+          <p className="text-sm text-slate-500 group-hover:text-slate-400 transition-colors">{subtitle}</p>
         )}
       </div>
     </div>
@@ -163,15 +181,15 @@ export default function WalletStatsGrid({ stats, isLoading }: WalletStatsGridPro
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
         {Array.from({ length: 8 }).map((_, i) => (
-          <div key={i} className="bg-gray-100 rounded-2xl p-6 animate-pulse">
+          <div key={i} className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-6 animate-pulse">
             <div className="flex items-start justify-between mb-4">
-              <div className="w-12 h-12 bg-gray-200 rounded-xl"></div>
-              <div className="w-16 h-4 bg-gray-200 rounded"></div>
+              <div className="w-12 h-12 bg-slate-700/50 rounded-xl"></div>
+              <div className="w-16 h-4 bg-slate-700/50 rounded"></div>
             </div>
             <div className="space-y-2">
-              <div className="w-20 h-4 bg-gray-200 rounded"></div>
-              <div className="w-16 h-8 bg-gray-200 rounded"></div>
-              <div className="w-24 h-3 bg-gray-200 rounded"></div>
+              <div className="w-20 h-4 bg-slate-700/50 rounded"></div>
+              <div className="w-16 h-8 bg-slate-700/50 rounded"></div>
+              <div className="w-24 h-3 bg-slate-700/50 rounded"></div>
             </div>
           </div>
         ))}
@@ -182,24 +200,36 @@ export default function WalletStatsGrid({ stats, isLoading }: WalletStatsGridPro
   return (
     <div className="space-y-8">
       {/* Header Card */}
-      <div className="bg-gradient-to-r from-slate-50 to-slate-100/50 border border-slate-200/50 rounded-2xl p-8">
-        <div className="flex items-center justify-between">
+      <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-8 relative overflow-hidden">
+        {/* Background decoration */}
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-cyan-500/5 pointer-events-none"></div>
+        
+        <div className="flex items-center justify-between relative">
           <div>
-            <h2 className="text-2xl font-bold text-slate-700 mb-2">Active Account</h2>
-            <div className="flex items-center gap-4 text-sm text-slate-600">
-              <span className="flex items-center gap-1">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 rounded-xl flex items-center justify-center">
+                <FiBarChart className="w-6 h-6 text-blue-400" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-white mb-1">Active Wallet</h2>
+                <p className="text-sm text-slate-400">On-chain activity overview</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-6 text-sm text-slate-400">
+              <span className="flex items-center gap-2">
                 <FiClock className="w-4 h-4" />
-                Wallet Age: <span className="font-semibold">{stats.walletAge}</span>
+                Wallet Age: <span className="font-semibold text-slate-300">{stats.walletAge}</span>
               </span>
-              <span className="flex items-center gap-1">
+              <span className="flex items-center gap-2">
                 <FiActivity className="w-4 h-4" />
-                Period: <span className="font-semibold">{stats.timeframe}</span>
+                Period: <span className="font-semibold text-slate-300">{stats.timeframe}</span>
               </span>
             </div>
           </div>
           <div className="text-right">
-            <p className="text-sm text-slate-500">Balance (MON)</p>
-            <p className="text-3xl font-bold text-slate-700">{parseFloat(stats.overview.balance).toFixed(4)}</p>
+            <p className="text-sm text-slate-400 mb-1">Current Balance</p>
+            <p className="text-3xl font-bold text-white">{parseFloat(stats.overview.balance).toFixed(4)}</p>
+            <p className="text-sm text-slate-400">MON</p>
           </div>
         </div>
       </div>
@@ -207,9 +237,9 @@ export default function WalletStatsGrid({ stats, isLoading }: WalletStatsGridPro
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         <StatsCard
-          title="Interactions"
+          title="Total Interactions"
           value={stats.interactions.total.toLocaleString()}
-          subtitle={`Approve: ${stats.interactions.approvals}`}
+          subtitle={`Approvals: ${stats.interactions.approvals}`}
           trend={{
             value: Math.floor(stats.interactions.total * 0.1),
             period: stats.interactions.period,
@@ -220,9 +250,9 @@ export default function WalletStatsGrid({ stats, isLoading }: WalletStatsGridPro
         />
 
         <StatsCard
-          title="Interacted Contracts"
+          title="Smart Contracts"
           value={stats.interactions.uniqueContracts.toLocaleString()}
-          subtitle={`Deploy: ${stats.interactions.deployments} • Total: ${stats.interactions.total}`}
+          subtitle={`Deployments: ${stats.interactions.deployments}`}
           trend={{
             value: Math.floor(stats.interactions.uniqueContracts * 0.15),
             period: stats.interactions.period,
@@ -233,11 +263,11 @@ export default function WalletStatsGrid({ stats, isLoading }: WalletStatsGridPro
         />
 
         <StatsCard
-          title="Volume (MON)"
-          value={parseFloat(stats.volume.total).toFixed(4)}
-          subtitle={`${parseFloat(stats.volume.total).toFixed(4)} MON`}
+          title="Transaction Volume"
+          value={`${parseFloat(stats.volume.total).toFixed(2)} MON`}
+          subtitle={`Total transferred`}
           trend={{
-            value: Math.floor(parseFloat(stats.volume.total) * 0.2),
+            value: `${Math.floor(parseFloat(stats.volume.total) * 0.2)} MON`,
             period: stats.volume.period,
             isPositive: true
           }}
@@ -246,9 +276,9 @@ export default function WalletStatsGrid({ stats, isLoading }: WalletStatsGridPro
         />
 
         <StatsCard
-          title="NFT Mint"
+          title="NFTs Minted"
           value={stats.nfts.minted}
-          subtitle={`Unique: ${stats.nfts.unique} • Total: ${stats.nfts.minted}`}
+          subtitle={`Unique collections: ${stats.nfts.unique}`}
           trend={{
             value: Math.floor(stats.nfts.minted * 0.1),
             period: stats.nfts.period,
@@ -259,11 +289,11 @@ export default function WalletStatsGrid({ stats, isLoading }: WalletStatsGridPro
         />
 
         <StatsCard
-          title="Fees (MON)"
-          value={parseFloat(stats.fees.total).toFixed(6)}
-          subtitle={`${parseFloat(stats.fees.total).toFixed(6)} MON`}
+          title="Transaction Fees"
+          value={`${parseFloat(stats.fees.total).toFixed(6)} MON`}
+          subtitle="Total fees paid"
           trend={{
-            value: Math.floor(parseFloat(stats.fees.total) * 100) / 100,
+            value: `${Math.floor(parseFloat(stats.fees.total) * 100) / 100} MON`,
             period: stats.fees.period,
             isPositive: false
           }}
@@ -274,7 +304,7 @@ export default function WalletStatsGrid({ stats, isLoading }: WalletStatsGridPro
         <StatsCard
           title="Daily Activity"
           value={stats.activity.avgPerDay.toFixed(1)}
-          subtitle={`${stats.activity.totalDays} active days`}
+          subtitle={`Active days: ${stats.activity.totalDays}`}
           trend={{
             value: Math.floor(stats.activity.avgPerDay * 0.2),
             period: stats.timeframe,
@@ -285,9 +315,9 @@ export default function WalletStatsGrid({ stats, isLoading }: WalletStatsGridPro
         />
 
         <StatsCard
-          title="Unique Tokens"
+          title="Token Portfolio"
           value={stats.tokens.uniqueTokens}
-          subtitle={`Token: ${stats.tokens.uniqueTokens} • NFT: ${stats.tokens.uniqueNFTs}`}
+          subtitle={`NFTs: ${stats.tokens.uniqueNFTs}`}
           trend={{
             value: Math.floor(stats.tokens.uniqueTokens * 0.1),
             period: stats.tokens.period,
@@ -300,7 +330,7 @@ export default function WalletStatsGrid({ stats, isLoading }: WalletStatsGridPro
         <StatsCard
           title="Total Transactions"
           value={stats.overview.totalTransactions.toLocaleString()}
-          subtitle="All time transactions"
+          subtitle="Lifetime transactions"
           icon={<FiActivity className="w-6 h-6" />}
           color="rose"
         />
