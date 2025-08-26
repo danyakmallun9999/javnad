@@ -13,32 +13,32 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "JAVnad - Monad Testnet Explorer",
+  title: "JAVAnad - Monad Testnet Explorer",
   description: "Powerful on-chain analytics and exploration tools for the Monad testnet. Discover wallets, transactions, tokens, and NFTs with ease.",
   keywords: ["Monad", "blockchain", "explorer", "wallet", "NFT", "tokens", "testnet", "crypto", "analytics"],
   authors: [{ name: "IPVDAN", url: "https://twitter.com/ipvdan" }],
   creator: "IPVDAN",
-  publisher: "JAVnad",
+  publisher: "JAVAnad",
   formatDetection: {
     email: false,
     address: false,
     telephone: false,
   },
-  metadataBase: new URL('https://javnad.vercel.app'), // Update with your actual domain
+  metadataBase: new URL('https://javanad.vercel.app'), // Update with your actual domain
   alternates: {
     canonical: '/',
   },
   openGraph: {
-    title: "JAVnad - On-chain analytics",
+    title: "JAVAnad - On-chain analytics",
     description: "Powerful on-chain analytics and exploration tools for the Monad testnet. Discover wallets, transactions, tokens, and NFTs with ease.",
-    url: 'https://javnad.vercel.app', // Update with your actual domain
+    url: 'https://javanad.vercel.app', // Update with your actual domain
     siteName: 'JAVnad',
     images: [
       {
-        url: '/images/javnad.png',
+        url: '/images/javanad.png',
         width: 1200,
         height: 630,
-        alt: 'JAVnad - On-chain analytics',
+        alt: 'JAVAnad - On-chain analytics',
       },
     ],
     locale: 'en_US',
@@ -46,10 +46,10 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "JAVnad - On-chain analytics",
+    title: "JAVAnad - On-chain analytics",
     description: "Powerful on-chain analytics and exploration tools for the Monad testnet. Discover wallets, transactions, tokens, and NFTs with ease.",
     creator: '@ipvdan',
-    images: ['/images/javnad.png'],
+    images: ['/images/javanad.png'],
   },
   robots: {
     index: true,
