@@ -1,8 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { FiSearch, FiKey, FiHardDrive, FiGitMerge, FiImage, FiDollarSign } from 'react-icons/fi';
+import { FiSearch, FiKey, FiHardDrive, FiGitMerge, FiImage, FiDollarSign, FiBarChart } from 'react-icons/fi';
 import Image from 'next/image';
+import WalletStatsGrid from '@/components/WalletStatsCard';
 
 // Melengkapi semua definisi tipe data
 interface WalletInfo {
@@ -21,6 +22,8 @@ interface LatestBlockInfo {
 interface NetworkInfo {
   clientVersion: string;
   chainId: string;
+  protocolVersion?: string;
+  syncing?: string;
   latestBlock: LatestBlockInfo;
   gasPrice: string;
 }
@@ -47,6 +50,48 @@ interface TokenInfo {
   decimals: number;
 }
 
+interface WalletStats {
+  walletAge: string;
+  timeframe: string;
+  overview: {
+    balance: string;
+    totalTransactions: number;
+    walletAddress: string;
+  };
+  interactions: {
+    total: number;
+    approvals: number;
+    uniqueContracts: number;
+    deployments: number;
+    period: string;
+  };
+  volume: {
+    total: string;
+    totalUSD: number;
+    period: string;
+  };
+  fees: {
+    total: string;
+    totalUSD: number;
+    period: string;
+  };
+  tokens: {
+    uniqueTokens: number;
+    uniqueNFTs: number;
+    period: string;
+  };
+  nfts: {
+    minted: number;
+    unique: number;
+    period: string;
+  };
+  activity: {
+    dailyBreakdown: Record<string, number>;
+    totalDays: number;
+    avgPerDay: number;
+  };
+}
+
 // Komponen kecil untuk menampilkan baris data agar tidak berulang
 const DetailRow = ({ label, value, isMono = false, isHash = false }: { label: string, value: string | number | null | undefined, isMono?: boolean, isHash?: boolean }) => (
   <div className="py-3 px-4 grid grid-cols-3 gap-4 text-sm">
@@ -57,7 +102,7 @@ const DetailRow = ({ label, value, isMono = false, isHash = false }: { label: st
 
 
 export default function HomePage() {
-  const [activeTab, setActiveTab] = useState<'wallet' | 'transaction'>('wallet');
+  const [activeTab, setActiveTab] = useState<'wallet' | 'transaction' | 'stats'>('wallet');
   const [address, setAddress] = useState('');
   const [txHash, setTxHash] = useState('');
 
@@ -66,9 +111,12 @@ export default function HomePage() {
   const [txInfo, setTxInfo] = useState<TxInfo | null>(null);
   const [nfts, setNfts] = useState<NftInfo[] | null>(null);
   const [tokens, setTokens] = useState<TokenInfo[] | null>(null);
+  const [walletStats, setWalletStats] = useState<WalletStats | null>(null);
 
   const [isWalletLoading, setIsWalletLoading] = useState(false);
   const [isTxLoading, setIsTxLoading] = useState(false);
+  const [isStatsLoading, setIsStatsLoading] = useState(false);
+  const [statsTimeframe, setStatsTimeframe] = useState<'7d' | '30d' | 'all'>('7d');
   const [error, setError] = useState<string | null>(null);
 
   const handleCheckWallet = async () => {
@@ -130,6 +178,33 @@ export default function HomePage() {
     }
   };
 
+  // Function untuk mengambil wallet statistics
+  const handleCheckWalletStats = async () => {
+    if (!address) {
+      setError('Please enter a wallet address first');
+      return;
+    }
+
+    setIsStatsLoading(true);
+    setError(null);
+    setWalletStats(null);
+
+    try {
+      const response = await fetch(`/api/wallet-stats?address=${encodeURIComponent(address)}&timeframe=${statsTimeframe}`);
+      const data = await response.json();
+
+      if (data.error) {
+        setError(data.error);
+      } else {
+        setWalletStats(data);
+      }
+    } catch (err) {
+      setError(`Error: ${(err as Error).message}`);
+    }
+
+    setIsStatsLoading(false);
+  };
+
   return (
     <main className="min-h-screen bg-slate-900 text-white font-sans p-4 sm:p-8">
       <div className="max-w-7xl mx-auto">
@@ -149,39 +224,56 @@ export default function HomePage() {
           <div className="flex justify-center">
             <div className="bg-slate-800/50 p-1 rounded-xl border border-slate-700/80">
               <div className="flex gap-1">
-                <button
-                  onClick={() => {
-                    setActiveTab('wallet');
-                    setError(null);
-                    setTxInfo(null);
-                  }}
-                  className={`px-6 py-3 rounded-lg font-semibold transition-all duration-200 flex items-center gap-2 ${
-                    activeTab === 'wallet'
-                      ? 'bg-sky-600 text-white shadow-lg'
-                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-700/50'
-                  }`}
-                >
-                  <FiKey className="w-4 h-4" />
-                  Cek Alamat Wallet
-                </button>
-                <button
-                  onClick={() => {
-                    setActiveTab('transaction');
-                    setError(null);
-                    setWalletInfo(null);
-                    setNetworkInfo(null);
-                    setNfts(null);
-                    setTokens(null);
-                  }}
-                  className={`px-6 py-3 rounded-lg font-semibold transition-all duration-200 flex items-center gap-2 ${
-                    activeTab === 'transaction'
-                      ? 'bg-sky-600 text-white shadow-lg'
-                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-700/50'
-                  }`}
-                >
-                  <FiGitMerge className="w-4 h-4" />
-                  Cek Hash Transaksi
-                </button>
+                                        <button
+                          onClick={() => {
+                            setActiveTab('wallet');
+                            setError(null);
+                            setTxInfo(null);
+                            setWalletStats(null);
+                          }}
+                          className={`px-6 py-3 rounded-lg font-semibold transition-all duration-200 flex items-center gap-2 ${
+                            activeTab === 'wallet'
+                              ? 'bg-sky-600 text-white shadow-lg'
+                              : 'text-slate-400 hover:text-slate-200 hover:bg-slate-700/50'
+                          }`}
+                        >
+                          <FiKey className="w-4 h-4" />
+                          Cek Alamat Wallet
+                        </button>
+                        <button
+                          onClick={() => {
+                            setActiveTab('transaction');
+                            setError(null);
+                            setWalletInfo(null);
+                            setNetworkInfo(null);
+                            setNfts(null);
+                            setTokens(null);
+                            setWalletStats(null);
+                          }}
+                          className={`px-6 py-3 rounded-lg font-semibold transition-all duration-200 flex items-center gap-2 ${
+                            activeTab === 'transaction'
+                              ? 'bg-sky-600 text-white shadow-lg'
+                              : 'text-slate-400 hover:text-slate-200 hover:bg-slate-700/50'
+                          }`}
+                        >
+                          <FiGitMerge className="w-4 h-4" />
+                          Cek Hash Transaksi
+                        </button>
+                        <button
+                          onClick={() => {
+                            setActiveTab('stats');
+                            setError(null);
+                            setTxInfo(null);
+                          }}
+                          className={`px-6 py-3 rounded-lg font-semibold transition-all duration-200 flex items-center gap-2 ${
+                            activeTab === 'stats'
+                              ? 'bg-sky-600 text-white shadow-lg'
+                              : 'text-slate-400 hover:text-slate-200 hover:bg-slate-700/50'
+                          }`}
+                        >
+                          <FiBarChart className="w-4 h-4" />
+                          Statistik Wallet
+                        </button>
               </div>
             </div>
           </div>
@@ -266,12 +358,61 @@ export default function HomePage() {
               </div>
             </div>
           )}
+
+          {activeTab === 'stats' && (
+            <div className="max-w-2xl mx-auto">
+              <div className="bg-slate-800/50 p-6 rounded-xl border border-slate-700/80">
+                <label className="text-sm font-semibold text-slate-300 mb-3 flex items-center gap-2">
+                  <FiBarChart className="w-4 h-4" />
+                  Analisis Statistik Wallet
+                </label>
+                <div className="flex gap-3 mb-4">
+                  <input 
+                    type="text" 
+                    value={address} 
+                    onChange={(e) => setAddress(e.target.value)} 
+                    placeholder="0x..." 
+                    className="flex-1 p-3 bg-slate-800 border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 font-mono text-sm"
+                  />
+                  <select
+                    value={statsTimeframe}
+                    onChange={(e) => setStatsTimeframe(e.target.value as '7d' | '30d' | 'all')}
+                    className="px-4 py-3 bg-slate-800 border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500"
+                  >
+                    <option value="7d">7 Hari</option>
+                    <option value="30d">30 Hari</option>
+                    <option value="all">Semua</option>
+                  </select>
+                  <button 
+                    onClick={handleCheckWalletStats} 
+                    disabled={isStatsLoading || !address} 
+                    className="px-6 py-3 bg-sky-600 rounded-lg font-semibold hover:bg-sky-700 disabled:bg-gray-500 transition-colors flex items-center gap-2 min-w-[140px] justify-center"
+                  >
+                    {isStatsLoading ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        Analyzing...
+                      </>
+                    ) : (
+                      <>
+                        <FiBarChart className="w-4 h-4" />
+                        Analisis
+                      </>
+                    )}
+                  </button>
+                </div>
+                <p className="text-xs text-slate-500">
+                  Analisis comprehensive untuk aktivitas wallet dalam periode yang dipilih
+                </p>
+              </div>
+            </div>
+          )}
         </div>
 
         {error && <div className="mb-8 p-4 bg-red-900/50 border border-red-700 rounded-lg text-center"><p>{error}</p></div>}
 
         {/* --- Area Hasil --- */}
-        {activeTab === 'wallet' ? (
+        {activeTab === 'wallet' && (
           <>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* --- Kolom Kiri: Info Jaringan dan Wallet --- */}
@@ -387,25 +528,42 @@ export default function HomePage() {
               </section>
             </div>
           </>
-        ) : (
-          <>
-            <div className="max-w-4xl mx-auto">
-              <section>
-                <h2 className="text-xl font-bold mb-4 text-slate-300 flex items-center gap-2"><FiGitMerge /> Detail Transaksi</h2>
-                <div className="bg-slate-800/50 rounded-xl border border-slate-700/80 divide-y divide-slate-700/80">
-                  {isTxLoading ? <p className="p-4">Loading...</p> : txInfo ? <>
-                    <DetailRow label="Hash Transaksi" value={txInfo.hash} isMono isHash />
-                    <DetailRow label="Status" value={txInfo.status} />
-                    <DetailRow label="Nomor Blok" value={txInfo.blockNumber} isMono />
-                    <DetailRow label="Dari" value={txInfo.from} isMono isHash />
-                    <DetailRow label="Ke" value={txInfo.to} isMono isHash />
-                    <DetailRow label="Value" value={`${txInfo.value} MON`} isMono />
-                    <DetailRow label="Biaya Transaksi" value={`${parseFloat(txInfo.txFee).toPrecision(5)} MON`} isMono />
-                  </> : <p className="p-4 text-slate-400">Cari hash transaksi untuk melihat detailnya.</p>}
-                </div>
-              </section>
-            </div>
-          </>
+        )}
+
+        {activeTab === 'transaction' && (
+          <div className="max-w-4xl mx-auto">
+            <section>
+              <h2 className="text-xl font-bold mb-4 text-slate-300 flex items-center gap-2"><FiGitMerge /> Detail Transaksi</h2>
+              <div className="bg-slate-800/50 rounded-xl border border-slate-700/80 divide-y divide-slate-700/80">
+                {isTxLoading ? <p className="p-4">Loading...</p> : txInfo ? <>
+                  <DetailRow label="Hash Transaksi" value={txInfo.hash} isMono isHash />
+                  <DetailRow label="Status" value={txInfo.status} />
+                  <DetailRow label="Nomor Blok" value={txInfo.blockNumber} isMono />
+                  <DetailRow label="Dari" value={txInfo.from} isMono isHash />
+                  <DetailRow label="Ke" value={txInfo.to} isMono isHash />
+                  <DetailRow label="Value" value={`${txInfo.value} MON`} isMono />
+                  <DetailRow label="Biaya Transaksi" value={`${parseFloat(txInfo.txFee).toPrecision(5)} MON`} isMono />
+                </> : <p className="p-4 text-slate-400">Cari hash transaksi untuk melihat detailnya.</p>}
+              </div>
+            </section>
+          </div>
+        )}
+
+        {activeTab === 'stats' && (
+          <div className="max-w-7xl mx-auto">
+            {walletStats ? (
+              <WalletStatsGrid stats={walletStats} isLoading={isStatsLoading} />
+            ) : !isStatsLoading ? (
+              <div className="text-center py-20">
+                <div className="text-6xl mb-4">📊</div>
+                <h3 className="text-xl font-semibold text-slate-300 mb-2">Wallet Statistics Dashboard</h3>
+                <p className="text-slate-400 max-w-md mx-auto">
+                  Masukkan alamat wallet dan pilih periode analisis untuk melihat statistik comprehensive termasuk 
+                  aktivitas transaksi, interaksi kontrak, volume, fees, dan lainnya.
+                </p>
+              </div>
+            ) : null}
+          </div>
         )}
       </div>
     </main>
