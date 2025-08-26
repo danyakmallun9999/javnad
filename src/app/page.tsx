@@ -41,6 +41,27 @@ interface NftInfo {
   tokenId: string;
   media: { gateway: string }[];
   contract: { address: string };
+  // Blockvision specific fields
+  name?: string;
+  image?: string;
+  collectionName?: string;
+  verified?: boolean;
+  method?: string;
+  transactionHash?: string;
+  blockNumber?: number;
+  timestamp?: number;
+  type?: string;
+  qty?: string;
+  contractAddress?: string;
+}
+
+interface NFTSummary {
+  owned: number;
+  totalActivities: number;
+  collections: number;
+  minted: number;
+  received: number;
+  sent: number;
 }
 interface TokenInfo {
   symbol: string;
@@ -102,7 +123,7 @@ const DetailRow = ({ label, value, isMono = false, isHash = false }: { label: st
 
 
 export default function HomePage() {
-  const [activeTab, setActiveTab] = useState<'wallet' | 'transaction' | 'stats'>('wallet');
+  const [activeTab, setActiveTab] = useState<'wallet' | 'transaction'>('wallet');
   const [address, setAddress] = useState('');
   const [txHash, setTxHash] = useState('');
 
@@ -110,13 +131,14 @@ export default function HomePage() {
   const [networkInfo, setNetworkInfo] = useState<NetworkInfo | null>(null);
   const [txInfo, setTxInfo] = useState<TxInfo | null>(null);
   const [nfts, setNfts] = useState<NftInfo[] | null>(null);
+  const [nftSummary, setNftSummary] = useState<NFTSummary | null>(null);
+  const [nftProvider, setNftProvider] = useState<'alchemy' | 'blockvision'>('blockvision');
   const [tokens, setTokens] = useState<TokenInfo[] | null>(null);
   const [walletStats, setWalletStats] = useState<WalletStats | null>(null);
 
   const [isWalletLoading, setIsWalletLoading] = useState(false);
   const [isTxLoading, setIsTxLoading] = useState(false);
-  const [isStatsLoading, setIsStatsLoading] = useState(false);
-  const [statsTimeframe, setStatsTimeframe] = useState<'7d' | '30d' | 'all'>('7d');
+
   const [error, setError] = useState<string | null>(null);
 
   const handleCheckWallet = async () => {
@@ -127,10 +149,17 @@ export default function HomePage() {
     setNfts(null);
     setTokens(null);
     try {
-      const [walletRes, nftRes, tokenRes] = await Promise.all([
+      // Choose NFT endpoint based on provider
+      let nftEndpoint = `/api/get-nfts?address=${address}`;
+      if (nftProvider === 'blockvision') {
+        nftEndpoint = `/api/get-nfts-blockvision?address=${address}&limit=50`;
+      }
+        
+      const [walletRes, nftRes, tokenRes, statsRes] = await Promise.all([
         fetch(`/api/check-wallet?address=${address}`),
-        fetch(`/api/get-nfts?address=${address}`),
-        fetch(`/api/get-tokens?address=${address}`)
+        fetch(nftEndpoint),
+        fetch(`/api/get-tokens?address=${address}`),
+        fetch(`/api/wallet-stats?address=${address}&timeframe=all`)
       ]);
 
       const walletData = await walletRes.json();
@@ -142,8 +171,15 @@ export default function HomePage() {
       if (!nftRes.ok) {
         console.warn('NFT fetch failed:', nftData.error);
         setNfts([]);
+        setNftSummary(null);
       } else {
-        setNfts(nftData.ownedNfts);
+        if (nftProvider === 'blockvision') {
+          setNfts(nftData.nfts || []);
+          setNftSummary(nftData.summary || null);
+        } else {
+          setNfts(nftData.ownedNfts || []);
+          setNftSummary(null);
+        }
       }
 
       const tokenData = await tokenRes.json();
@@ -152,6 +188,15 @@ export default function HomePage() {
         setTokens([]);
       } else {
         setTokens(tokenData.tokens);
+      }
+
+      // Handle wallet stats
+      const statsData = await statsRes.json();
+      if (!statsRes.ok) {
+        console.warn('Wallet stats fetch failed:', statsData.error);
+        setWalletStats(null);
+      } else {
+        setWalletStats(statsData);
       }
 
     } catch (err: unknown) {
@@ -178,32 +223,8 @@ export default function HomePage() {
     }
   };
 
-  // Function untuk mengambil wallet statistics
-  const handleCheckWalletStats = async () => {
-    if (!address) {
-      setError('Please enter a wallet address first');
-      return;
-    }
 
-    setIsStatsLoading(true);
-    setError(null);
-    setWalletStats(null);
 
-    try {
-      const response = await fetch(`/api/wallet-stats?address=${encodeURIComponent(address)}&timeframe=${statsTimeframe}`);
-      const data = await response.json();
-
-      if (data.error) {
-        setError(data.error);
-      } else {
-        setWalletStats(data);
-      }
-    } catch (err) {
-      setError(`Error: ${(err as Error).message}`);
-    }
-
-    setIsStatsLoading(false);
-  };
 
   return (
     <main className="min-h-screen bg-slate-900 text-white font-sans p-4 sm:p-8">
@@ -214,7 +235,8 @@ export default function HomePage() {
           <p className="text-slate-400 mt-2">Alat untuk melihat data on-chain dari jaringan Monad.</p>
           <div className="mt-4 p-4 bg-blue-900/30 border border-blue-700/50 rounded-lg">
             <p className="text-sm text-blue-200">
-              💡 <strong>Status:</strong> Token detection menggunakan Alchemy API dan berjalan dengan baik. NFT detection menggunakan event scanning (dalam development).
+              🚀 <strong>Development Status:</strong> Aplikasi ini sedang dikembangkan oleh<strong><a href="https://twitter.com/ipvdan" target="_blank" rel="noopener noreferrer" className="text-sky-300 hover:text-sky-200 underline ml-1">@ipvdan
+              </a></strong>  dan masih dalam tahap pengembangan aktif. Fitur-fitur akan terus diperbarui dan ditingkatkan.
             </p>
           </div>
         </div>
@@ -229,7 +251,6 @@ export default function HomePage() {
                             setActiveTab('wallet');
                             setError(null);
                             setTxInfo(null);
-                            setWalletStats(null);
                           }}
                           className={`px-6 py-3 rounded-lg font-semibold transition-all duration-200 flex items-center gap-2 ${
                             activeTab === 'wallet'
@@ -248,7 +269,6 @@ export default function HomePage() {
                             setNetworkInfo(null);
                             setNfts(null);
                             setTokens(null);
-                            setWalletStats(null);
                           }}
                           className={`px-6 py-3 rounded-lg font-semibold transition-all duration-200 flex items-center gap-2 ${
                             activeTab === 'transaction'
@@ -259,21 +279,7 @@ export default function HomePage() {
                           <FiGitMerge className="w-4 h-4" />
                           Cek Hash Transaksi
                         </button>
-                        <button
-                          onClick={() => {
-                            setActiveTab('stats');
-                            setError(null);
-                            setTxInfo(null);
-                          }}
-                          className={`px-6 py-3 rounded-lg font-semibold transition-all duration-200 flex items-center gap-2 ${
-                            activeTab === 'stats'
-                              ? 'bg-sky-600 text-white shadow-lg'
-                              : 'text-slate-400 hover:text-slate-200 hover:bg-slate-700/50'
-                          }`}
-                        >
-                          <FiBarChart className="w-4 h-4" />
-                          Statistik Wallet
-                        </button>
+
               </div>
             </div>
           </div>
@@ -359,54 +365,7 @@ export default function HomePage() {
             </div>
           )}
 
-          {activeTab === 'stats' && (
-            <div className="max-w-2xl mx-auto">
-              <div className="bg-slate-800/50 p-6 rounded-xl border border-slate-700/80">
-                <label className="text-sm font-semibold text-slate-300 mb-3 flex items-center gap-2">
-                  <FiBarChart className="w-4 h-4" />
-                  Analisis Statistik Wallet
-                </label>
-                <div className="flex gap-3 mb-4">
-                  <input 
-                    type="text" 
-                    value={address} 
-                    onChange={(e) => setAddress(e.target.value)} 
-                    placeholder="0x..." 
-                    className="flex-1 p-3 bg-slate-800 border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 font-mono text-sm"
-                  />
-                  <select
-                    value={statsTimeframe}
-                    onChange={(e) => setStatsTimeframe(e.target.value as '7d' | '30d' | 'all')}
-                    className="px-4 py-3 bg-slate-800 border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500"
-                  >
-                    <option value="7d">7 Hari</option>
-                    <option value="30d">30 Hari</option>
-                    <option value="all">Semua</option>
-                  </select>
-                  <button 
-                    onClick={handleCheckWalletStats} 
-                    disabled={isStatsLoading || !address} 
-                    className="px-6 py-3 bg-sky-600 rounded-lg font-semibold hover:bg-sky-700 disabled:bg-gray-500 transition-colors flex items-center gap-2 min-w-[140px] justify-center"
-                  >
-                    {isStatsLoading ? (
-                      <>
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        Analyzing...
-                      </>
-                    ) : (
-                      <>
-                        <FiBarChart className="w-4 h-4" />
-                        Analisis
-                      </>
-                    )}
-                  </button>
-                </div>
-                <p className="text-xs text-slate-500">
-                  Analisis comprehensive untuk aktivitas wallet dalam periode yang dipilih
-                </p>
-              </div>
-            </div>
-          )}
+
         </div>
 
         {error && <div className="mb-8 p-4 bg-red-900/50 border border-red-700 rounded-lg text-center"><p>{error}</p></div>}
@@ -414,44 +373,40 @@ export default function HomePage() {
         {/* --- Area Hasil --- */}
         {activeTab === 'wallet' && (
           <>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* --- Kolom Kiri: Info Jaringan dan Wallet --- */}
-              <div className="flex flex-col gap-8">
-                <section>
-                  <h2 className="text-xl font-bold mb-4 text-slate-300 flex items-center gap-2"><FiHardDrive /> Status Jaringan</h2>
-                  <div className="bg-slate-800/50 rounded-xl border border-slate-700/80 divide-y divide-slate-700/80">
-                    {isWalletLoading ? <p className="p-4">Loading...</p> : networkInfo ? <>
-                      <DetailRow label="Blok Terbaru" value={`#${networkInfo.latestBlock.number}`} isMono />
-                      <DetailRow label="Timestamp" value={networkInfo.latestBlock.timestamp ? new Date(networkInfo.latestBlock.timestamp * 1000).toLocaleString() : 'N/A'} />
-                      <DetailRow label="Total TXs di Blok" value={networkInfo.latestBlock.transactionCount} />
-                      <DetailRow label="Hash Blok" value={networkInfo.latestBlock.hash || 'N/A'} isMono isHash />
-                      <DetailRow label="Chain ID" value={networkInfo.chainId} isMono />
-                      <DetailRow label="Protocol Version" value={networkInfo.protocolVersion || 'N/A'} />
-                      <DetailRow label="Sync Status" value={networkInfo.syncing || 'N/A'} />
-                      <DetailRow label="Gas Price" value={`${parseFloat(networkInfo.gasPrice).toFixed(2)} Gwei`} isMono />
-                    </> : <p className="p-4 text-slate-400">Cari alamat untuk melihat status jaringan.</p>}
-                  </div>
-                </section>
-                <section>
-                  <h2 className="text-xl font-bold mb-4 text-slate-300 flex items-center gap-2"><FiKey /> Info Wallet</h2>
-                  <div className="bg-slate-800/50 rounded-xl border border-slate-700/80 divide-y divide-slate-700/80">
-                    {isWalletLoading ? <p className="p-4">Loading...</p> : walletInfo ? <>
-                      <DetailRow label="Saldo Saat Ini" value={`${parseFloat(walletInfo.balance).toFixed(6)} MON`} isMono />
-                      <DetailRow label="Nonce (TX Count)" value={walletInfo.txCount} isMono />
-                      <DetailRow label="Tipe Alamat" value={walletInfo.isContract ? '📄 Smart Contract' : '👤 EOA'} />
-                      {walletInfo.historicalBalance && (
-                        <DetailRow label="Saldo 1000 Blok Lalu" value={`${parseFloat(walletInfo.historicalBalance).toFixed(6)} MON`} isMono />
-                      )}
-                      {walletInfo.storageAtSlot0 && walletInfo.storageAtSlot0 !== '0x0000000000000000000000000000000000000000000000000000000000000000' && (
-                        <DetailRow label="Storage Slot 0" value={walletInfo.storageAtSlot0} isMono isHash />
-                      )}
-                    </> : <p className="p-4 text-slate-400">Belum ada data wallet.</p>}
-                  </div>
-                </section>
+            {/* --- Wallet Statistics Cards (Top Section) --- */}
+            {walletStats && (
+              <div className="mb-10">
+                <h2 className="text-2xl font-bold mb-6 text-slate-300 flex items-center gap-2">
+                  <FiBarChart className="w-6 h-6" />
+                  Statistik Wallet
+                </h2>
+                <WalletStatsGrid stats={walletStats} isLoading={false} />
               </div>
+            )}
 
-              {/* --- Kolom Kanan: Token Balance --- */}
-              <div className="flex flex-col">
+            {/* --- Info Wallet Section --- */}
+            <div className="mb-10">
+              <section>
+                <h2 className="text-xl font-bold mb-4 text-slate-300 flex items-center gap-2"><FiKey /> Info Wallet</h2>
+                <div className="bg-slate-800/50 rounded-xl border border-slate-700/80 divide-y divide-slate-700/80">
+                  {isWalletLoading ? <p className="p-4">Loading...</p> : walletInfo ? <>
+                    <DetailRow label="Saldo Saat Ini" value={`${parseFloat(walletInfo.balance).toFixed(6)} MON`} isMono />
+                    <DetailRow label="Nonce (TX Count)" value={walletInfo.txCount} isMono />
+                    <DetailRow label="Tipe Alamat" value={walletInfo.isContract ? '📄 Smart Contract' : '👤 EOA'} />
+                    {walletInfo.historicalBalance && (
+                      <DetailRow label="Saldo 1000 Blok Lalu" value={`${parseFloat(walletInfo.historicalBalance).toFixed(6)} MON`} isMono />
+                    )}
+                    {walletInfo.storageAtSlot0 && walletInfo.storageAtSlot0 !== '0x0000000000000000000000000000000000000000000000000000000000000000' && (
+                      <DetailRow label="Storage Slot 0" value={walletInfo.storageAtSlot0} isMono isHash />
+                    )}
+                  </> : <p className="p-4 text-slate-400">Belum ada data wallet.</p>}
+                </div>
+              </section>
+            </div>
+
+            {/* --- Token Balance Section --- */}
+            <div className="mb-10">
+              <section>
                 <h2 className="text-xl font-bold mb-4 text-slate-300 flex items-center gap-2"><FiDollarSign /> Token Balance</h2>
                 {isWalletLoading ? (
                   <div className="bg-slate-800/50 rounded-xl border border-slate-700/80 p-8 text-center">
@@ -482,39 +437,106 @@ export default function HomePage() {
                     <p className="text-slate-400">Cari alamat untuk melihat token balance.</p>
                   </div>
                 )}
-              </div>
+              </section>
             </div>
 
-            {/* --- Section Galeri NFT (hanya di tab wallet) --- */}
-            <div className="mt-10">
+            {/* --- Section Galeri NFT --- */}
+            <div className="mb-10">
               <section>
-                <h2 className="text-xl font-bold mb-4 text-slate-300 flex items-center gap-2"><FiImage /> Galeri NFT</h2>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xl font-bold text-slate-300 flex items-center gap-2">
+                    <FiImage /> Galeri NFT
+                  </h2>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-slate-400">Provider:</span>
+                    <select
+                      value={nftProvider}
+                      onChange={(e) => setNftProvider(e.target.value as 'alchemy' | 'blockvision')}
+                      className="px-3 py-1 bg-slate-800 border border-slate-600 rounded-md text-sm text-slate-300 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                    >
+                      <option value="blockvision">Blockvision (Real Data)</option>
+                      <option value="alchemy">Alchemy (Event Logs)</option>
+                    </select>
+                  </div>
+                </div>
                 {isWalletLoading ? (
                   <div className="bg-slate-800/50 rounded-xl border border-slate-700/80 p-8 text-center">
                     <p className="text-slate-400">Loading NFTs...</p>
                   </div>
                 ) : nfts && nfts.length > 0 ? (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 xl:grid-cols-8 gap-3">
-                    {nfts.slice(0, 16).map((nft) => (
-                      <div key={`${nft.contract.address}-${nft.tokenId}`} className="bg-slate-800/50 rounded-lg border border-slate-700/80 overflow-hidden group">
-                        <div className="relative w-full h-32 overflow-hidden">
-                          <Image
-                            src={nft.media[0]?.gateway || 'https://via.placeholder.com/150?text=NFT'}
-                            alt={nft.title || 'Untitled NFT'}
-                            fill
-                            className="object-cover group-hover:scale-105 transition-transform duration-300"
-                            onError={(e) => {
-                              const target = e.target as HTMLImageElement;
-                              target.src = 'https://via.placeholder.com/150?text=NFT';
-                            }}
-                          />
+                  <div className="space-y-6">
+                    {/* NFT Summary (if using Blockvision) */}
+                    {nftProvider === 'blockvision' && nftSummary && (
+                      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 p-4 bg-slate-800/30 rounded-xl border border-slate-700/50">
+                        <div className="text-center">
+                          <p className="text-lg font-bold text-slate-200">{nftSummary.owned}</p>
+                          <p className="text-xs text-slate-400">Owned</p>
                         </div>
-                        <div className="p-2">
-                          <h3 className="font-bold text-xs truncate">{nft.title || 'Untitled NFT'}</h3>
-                          <p className="text-xs text-slate-400 font-mono truncate">#{nft.tokenId}</p>
+                        <div className="text-center">
+                          <p className="text-lg font-bold text-green-400">{nftSummary.minted}</p>
+                          <p className="text-xs text-slate-400">Minted</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-lg font-bold text-blue-400">{nftSummary.received}</p>
+                          <p className="text-xs text-slate-400">Received</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-lg font-bold text-orange-400">{nftSummary.sent}</p>
+                          <p className="text-xs text-slate-400">Sent</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-lg font-bold text-purple-400">{nftSummary.collections}</p>
+                          <p className="text-xs text-slate-400">Collections</p>
                         </div>
                       </div>
-                    ))}
+                    )}
+
+                    {/* NFT Grid */}
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 xl:grid-cols-8 gap-3">
+                      {nfts.slice(0, 16).map((nft) => (
+                        <div key={`${nft.contract?.address || nft.contractAddress}-${nft.tokenId}`} className="bg-slate-800/50 rounded-lg border border-slate-700/80 overflow-hidden group">
+                          <div className="relative w-full h-32 overflow-hidden">
+                            <Image
+                              src={nft.image || nft.media?.[0]?.gateway || 'https://via.placeholder.com/150?text=NFT'}
+                              alt={nft.title || nft.name || 'Untitled NFT'}
+                              fill
+                              className="object-cover group-hover:scale-105 transition-transform duration-300"
+                              unoptimized
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.src = 'https://via.placeholder.com/150?text=NFT';
+                              }}
+                            />
+                            {/* Provider badge */}
+                            <div className="absolute top-1 right-1">
+                              <span className={`px-1.5 py-0.5 text-xs rounded font-medium ${
+                                nftProvider === 'blockvision' 
+                                  ? 'bg-blue-600 text-white' 
+                                  : 'bg-purple-600 text-white'
+                              }`}>
+                                {nftProvider === 'blockvision' ? 'BV' : 'AL'}
+                              </span>
+                            </div>
+                            {/* Verified badge */}
+                            {nft.verified && (
+                              <div className="absolute top-1 left-1">
+                                <span className="text-green-400 text-xs">✓</span>
+                              </div>
+                            )}
+                          </div>
+                          <div className="p-2">
+                            <h3 className="font-bold text-xs truncate">{nft.title || nft.name || nft.collectionName || 'Untitled NFT'}</h3>
+                            <p className="text-xs text-slate-400 font-mono truncate">#{nft.tokenId}</p>
+                            {nft.collectionName && nft.collectionName !== nft.title && (
+                              <p className="text-xs text-slate-500 truncate">{nft.collectionName}</p>
+                            )}
+                            {nft.method && (
+                              <p className="text-xs text-slate-500 capitalize">{nft.method}</p>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 ) : nfts !== null ? (
                   <div className="bg-slate-800/50 rounded-xl border border-slate-700/80 p-8 text-center">
@@ -525,6 +547,25 @@ export default function HomePage() {
                     <p className="text-slate-400">Cari alamat untuk melihat NFT.</p>
                   </div>
                 )}
+              </section>
+            </div>
+
+            {/* --- Status Jaringan Section (Moved to Bottom) --- */}
+            <div className="mb-10">
+              <section>
+                <h2 className="text-xl font-bold mb-4 text-slate-300 flex items-center gap-2"><FiHardDrive /> Status Jaringan</h2>
+                <div className="bg-slate-800/50 rounded-xl border border-slate-700/80 divide-y divide-slate-700/80">
+                  {isWalletLoading ? <p className="p-4">Loading...</p> : networkInfo ? <>
+                    <DetailRow label="Blok Terbaru" value={`#${networkInfo.latestBlock.number}`} isMono />
+                    <DetailRow label="Timestamp" value={networkInfo.latestBlock.timestamp ? new Date(networkInfo.latestBlock.timestamp * 1000).toLocaleString() : 'N/A'} />
+                    <DetailRow label="Total TXs di Blok" value={networkInfo.latestBlock.transactionCount} />
+                    <DetailRow label="Hash Blok" value={networkInfo.latestBlock.hash || 'N/A'} isMono isHash />
+                    <DetailRow label="Chain ID" value={networkInfo.chainId} isMono />
+                    <DetailRow label="Protocol Version" value={networkInfo.protocolVersion || 'N/A'} />
+                    <DetailRow label="Sync Status" value={networkInfo.syncing || 'N/A'} />
+                    <DetailRow label="Gas Price" value={`${parseFloat(networkInfo.gasPrice).toFixed(2)} Gwei`} isMono />
+                  </> : <p className="p-4 text-slate-400">Cari alamat untuk melihat status jaringan.</p>}
+                </div>
               </section>
             </div>
           </>
@@ -549,22 +590,7 @@ export default function HomePage() {
           </div>
         )}
 
-        {activeTab === 'stats' && (
-          <div className="max-w-7xl mx-auto">
-            {walletStats ? (
-              <WalletStatsGrid stats={walletStats} isLoading={isStatsLoading} />
-            ) : !isStatsLoading ? (
-              <div className="text-center py-20">
-                <div className="text-6xl mb-4">📊</div>
-                <h3 className="text-xl font-semibold text-slate-300 mb-2">Wallet Statistics Dashboard</h3>
-                <p className="text-slate-400 max-w-md mx-auto">
-                  Masukkan alamat wallet dan pilih periode analisis untuk melihat statistik comprehensive termasuk 
-                  aktivitas transaksi, interaksi kontrak, volume, fees, dan lainnya.
-                </p>
-              </div>
-            ) : null}
-          </div>
-        )}
+
       </div>
     </main>
   );
