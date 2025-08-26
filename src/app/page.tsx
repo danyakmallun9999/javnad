@@ -369,10 +369,7 @@ export default function HomePage() {
                 onClick={() => {
                   setActiveTab('transaction');
                   setError(null);
-                  setWalletInfo(null);
-                  setNetworkInfo(null);
-                  setNfts(null);
-                  setTokens(null);
+                  // Keep wallet data when switching tabs
                 }}
                 className={`px-6 py-3 rounded-xl font-semibold transition-all duration-200 flex items-center gap-3 ${
                   activeTab === 'transaction'
