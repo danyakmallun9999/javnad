@@ -222,10 +222,14 @@ export default function HomePage() {
   
   // NFT image loading state
   const [nftImageErrors, setNftImageErrors] = useState<Set<string>>(new Set());
+  
+  // Loading popup state
+  const [showLoadingPopup, setShowLoadingPopup] = useState(false);
 
   // Keep existing handler functions
   const handleCheckWallet = async () => {
     setIsWalletLoading(true);
+    setShowLoadingPopup(true); // Show loading popup
     setError(null);
     setWalletInfo(null);
     setNetworkInfo(null);
@@ -286,6 +290,7 @@ export default function HomePage() {
       setError((err as Error).message);
     } finally {
       setIsWalletLoading(false);
+      setShowLoadingPopup(false); // Hide loading popup
     }
   };
 
@@ -314,6 +319,42 @@ export default function HomePage() {
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        {/* Loading Popup */}
+        {showLoadingPopup && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+            <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl border border-white/10 p-8 max-w-md mx-4 text-center">
+              {/* Loading Icon */}
+              <div className="w-20 h-20 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center mx-auto mb-6 animate-spin">
+                <div className="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center">
+                  <FiKey className="w-8 h-8 text-white" />
+                </div>
+              </div>
+              
+              {/* Loading Text */}
+              <div className="space-y-3">
+                <h3 className="text-xl font-bold text-white mb-2">
+                  Fetching wallet data
+                </h3>
+                <div className="space-y-2">
+                  <p className="text-blue-300 font-medium">
+                    Monad testnet loading
+                  </p>
+                  <p className="text-gray-400 text-sm">
+                    Please wait...
+                  </p>
+                </div>
+              </div>
+              
+              {/* Loading Dots */}
+              <div className="flex justify-center gap-1 mt-6">
+                <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
+                <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+              </div>
+            </div>
+          </div>
+        )}
         {/* Hero Section */}
         <div className="text-center mb-16">
           <div className="inline-flex items-center px-4 py-2 bg-blue-500/10 border border-blue-500/20 rounded-full mb-6">
