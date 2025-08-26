@@ -215,6 +215,13 @@ export default function HomePage() {
   const [isWalletLoading, setIsWalletLoading] = useState(false);
   const [isTxLoading, setIsTxLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // Token pagination state
+  const [currentTokenPage, setCurrentTokenPage] = useState(1);
+  const tokensPerPage = 9;
+  
+  // NFT image loading state
+  const [nftImageErrors, setNftImageErrors] = useState<Set<string>>(new Set());
 
   // Keep existing handler functions
   const handleCheckWallet = async () => {
@@ -224,6 +231,8 @@ export default function HomePage() {
     setNetworkInfo(null);
     setNfts(null);
     setTokens(null);
+    setCurrentTokenPage(1); // Reset pagination
+    setNftImageErrors(new Set()); // Reset image errors
     try {
       let nftEndpoint = `/api/get-nfts?address=${address}`;
       if (nftProvider === 'blockvision') {
@@ -573,29 +582,62 @@ export default function HomePage() {
                   <p className="text-gray-400">Loading tokens...</p>
                 </Card>
               ) : tokens && tokens.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {tokens.map((token, index) => (
-                    <Card key={`${token.contractAddress}-${index}`} hover className="p-6">
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center">
-                          <span className="text-white font-bold text-lg">
-                            {token.symbol.charAt(0)}
-                          </span>
-                        </div>
-                        <FiExternalLink className="w-4 h-4 text-gray-500" />
+                <div className="space-y-6">
+                  {/* Token Grid with Pagination */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {tokens
+                      .slice((currentTokenPage - 1) * tokensPerPage, currentTokenPage * tokensPerPage)
+                      .map((token, index) => (
+                        <Card key={`${token.contractAddress}-${index}`} hover className="p-6">
+                          <div className="flex items-center justify-between mb-4">
+                            <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center">
+                              <span className="text-white font-bold text-lg">
+                                {token.symbol.charAt(0)}
+                              </span>
+                            </div>
+                            <FiExternalLink className="w-4 h-4 text-gray-500" />
+                          </div>
+                          <div>
+                            <h4 className="font-bold text-white mb-1">{token.symbol}</h4>
+                            <p className="text-sm text-gray-400 mb-3 truncate">{token.name}</p>
+                            <div className="flex items-center justify-between">
+                              <span className="text-2xl font-bold text-white">
+                                {parseFloat(token.balance).toFixed(4)}
+                              </span>
+                              <span className="text-sm text-gray-500">{token.symbol}</span>
+                            </div>
+                          </div>
+                        </Card>
+                      ))}
+                  </div>
+
+                  {/* Pagination Controls */}
+                  {tokens.length > tokensPerPage && (
+                    <div className="flex items-center justify-between">
+                      <div className="text-sm text-gray-400">
+                        Showing {((currentTokenPage - 1) * tokensPerPage) + 1} to {Math.min(currentTokenPage * tokensPerPage, tokens.length)} of {tokens.length} tokens
                       </div>
-                      <div>
-                        <h4 className="font-bold text-white mb-1">{token.symbol}</h4>
-                        <p className="text-sm text-gray-400 mb-3 truncate">{token.name}</p>
-                        <div className="flex items-center justify-between">
-                          <span className="text-2xl font-bold text-white">
-                            {parseFloat(token.balance).toFixed(4)}
-                          </span>
-                          <span className="text-sm text-gray-500">{token.symbol}</span>
-                        </div>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => setCurrentTokenPage(prev => Math.max(1, prev - 1))}
+                          disabled={currentTokenPage === 1}
+                          className="px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-gray-300 hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        >
+                          Previous
+                        </button>
+                        <span className="px-3 py-2 text-sm text-gray-400">
+                          {currentTokenPage} / {Math.ceil(tokens.length / tokensPerPage)}
+                        </span>
+                        <button
+                          onClick={() => setCurrentTokenPage(prev => Math.min(Math.ceil(tokens.length / tokensPerPage), prev + 1))}
+                          disabled={currentTokenPage >= Math.ceil(tokens.length / tokensPerPage)}
+                          className="px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-gray-300 hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        >
+                          Next
+                        </button>
                       </div>
-                    </Card>
-                  ))}
+                    </div>
+                  )}
                 </div>
               ) : tokens !== null ? (
                 <Card className="p-12 text-center">
@@ -661,17 +703,27 @@ export default function HomePage() {
                     {nfts.slice(0, 16).map((nft) => (
                       <Card key={`${nft.contract?.address || nft.contractAddress}-${nft.tokenId}`} hover className="group overflow-hidden">
                         <div className="relative aspect-square overflow-hidden">
-                          <Image
-                            src={nft.image || nft.media?.[0]?.gateway || 'https://via.placeholder.com/200?text=NFT'}
-                            alt={nft.title || nft.name || 'Untitled NFT'}
-                            fill
-                            className="object-cover group-hover:scale-110 transition-transform duration-500"
-                            unoptimized
-                            onError={(e) => {
-                              const target = e.target as HTMLImageElement;
-                              target.src = 'https://via.placeholder.com/200?text=NFT';
-                            }}
-                          />
+                          {nftImageErrors.has(`${nft.contract?.address || nft.contractAddress}-${nft.tokenId}`) ? (
+                            // Fallback when image fails to load
+                            <div className="w-full h-full bg-gradient-to-br from-gray-600 to-gray-800 flex items-center justify-center">
+                              <div className="text-center">
+                                <FiImage className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                                <p className="text-xs text-gray-400">Image unavailable</p>
+                              </div>
+                            </div>
+                          ) : (
+                            <Image
+                              src={nft.image || nft.media?.[0]?.gateway || 'https://via.placeholder.com/200?text=NFT'}
+                              alt={nft.title || nft.name || 'Untitled NFT'}
+                              fill
+                              className="object-cover group-hover:scale-110 transition-transform duration-500"
+                              unoptimized
+                              onError={(e) => {
+                                const nftKey = `${nft.contract?.address || nft.contractAddress}-${nft.tokenId}`;
+                                setNftImageErrors(prev => new Set(prev).add(nftKey));
+                              }}
+                            />
+                          )}
                           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                           
                           {/* Badges */}
