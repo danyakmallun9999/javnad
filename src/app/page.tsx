@@ -284,6 +284,10 @@ export default function HomePage() {
                       <DetailRow label="Timestamp" value={networkInfo.latestBlock.timestamp ? new Date(networkInfo.latestBlock.timestamp * 1000).toLocaleString() : 'N/A'} />
                       <DetailRow label="Total TXs di Blok" value={networkInfo.latestBlock.transactionCount} />
                       <DetailRow label="Hash Blok" value={networkInfo.latestBlock.hash || 'N/A'} isMono isHash />
+                      <DetailRow label="Chain ID" value={networkInfo.chainId} isMono />
+                      <DetailRow label="Protocol Version" value={networkInfo.protocolVersion || 'N/A'} />
+                      <DetailRow label="Sync Status" value={networkInfo.syncing || 'N/A'} />
+                      <DetailRow label="Gas Price" value={`${parseFloat(networkInfo.gasPrice).toFixed(2)} Gwei`} isMono />
                     </> : <p className="p-4 text-slate-400">Cari alamat untuk melihat status jaringan.</p>}
                   </div>
                 </section>

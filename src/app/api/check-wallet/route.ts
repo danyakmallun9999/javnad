@@ -14,7 +14,7 @@ export async function GET(request: Request) {
         const rpcUrl = `https://monad-testnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`;
         const provider = new ethers.JsonRpcProvider(rpcUrl);
 
-        // Ambil data dasar terlebih dahulu
+        // Ambil data dasar terlebih dahulu (hanya endpoint yang confirmed supported)
         const [
             balance,
             txCount,
@@ -23,7 +23,9 @@ export async function GET(request: Request) {
             feeData,
             network,
             clientVersion,
-            storageAtSlot0 // Data baru: Ambil nilai storage di slot 0
+            storageAtSlot0, // Data baru: Ambil nilai storage di slot 0
+            chainId,
+            syncing
         ] = await Promise.all([
             provider.getBalance(address),
             provider.getTransactionCount(address),
@@ -32,8 +34,18 @@ export async function GET(request: Request) {
             provider.getFeeData(),
             provider.getNetwork(),
             provider.send('web3_clientVersion', []),
-            provider.getStorage(address, 0) // Memanggil eth_getStorageAt(address, slot 0)
+            provider.getStorage(address, 0), // Memanggil eth_getStorageAt(address, slot 0)
+            provider.send('eth_chainId', []), // Chain ID dari network
+            provider.send('eth_syncing', []) // Sync status
         ]);
+
+        // Try to get protocol version (might not be supported)
+        let protocolVersion = 'Not available';
+        try {
+            protocolVersion = await provider.send('eth_protocolVersion', []);
+        } catch {
+            console.log('eth_protocolVersion not supported');
+        }
 
         const latestBlockNumber = latestBlock?.number ?? 0;
         // Data baru: Ambil saldo dari 1000 blok yang lalu
@@ -52,7 +64,9 @@ export async function GET(request: Request) {
             },
             network: {
                 clientVersion,
-                chainId: network.chainId.toString(),
+                chainId: chainId || network.chainId.toString(),
+                protocolVersion,
+                syncing: syncing === false ? 'Synced' : 'Syncing',
                 latestBlock: {
                     number: latestBlock?.number.toString(),
                     hash: latestBlock?.hash,
