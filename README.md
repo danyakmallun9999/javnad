@@ -1,162 +1,155 @@
-# 🔍 Monad Testnet Explorer
+# 🚀 JAVnad - Monad Testnet Explorer
 
-Aplikasi web untuk menganalisis dan melihat statistik wallet address di jaringan **Monad Testnet**. Aplikasi ini memungkinkan Anda untuk memeriksa saldo, transaksi, NFT, dan token yang dimiliki oleh alamat wallet tertentu.
+A powerful on-chain analytics and exploration tool for the Monad testnet. Discover wallets, transactions, tokens, and NFTs with ease.
 
-## ✨ Fitur
+## ✨ Features
 
-- 🔎 **Pencarian Wallet**: Analisis lengkap alamat wallet
-- 📊 **Statistik Jaringan**: Informasi real-time dari Monad Testnet
-- 💰 **Balance Tracker**: Saldo saat ini dan historis
-- 🖼️ **NFT Gallery**: Tampilkan koleksi NFT
-- 🪙 **Token Balance**: Daftar semua token yang dimiliki
-- 🔗 **Transaction Lookup**: Detail transaksi berdasarkan hash
-- 📱 **Responsive Design**: Optimal untuk desktop dan mobile
+- **🔍 Wallet Explorer**: Comprehensive wallet analysis with balance, transactions, and activity
+- **📊 Real-time Analytics**: Detailed wallet statistics and metrics
+- **🪙 Token Portfolio**: View all ERC-20 tokens with balances
+- **🖼️ NFT Gallery**: Explore NFT collections with Blockvision integration
+- **⚡ Transaction Lookup**: Detailed transaction information and status
+- **🌐 Network Status**: Live network information and block details
+
+## 🛠️ Tech Stack
+
+- **Framework**: Next.js 15 with TypeScript
+- **Styling**: Tailwind CSS 4
+- **Blockchain**: Ethers.js for RPC calls
+- **APIs**: Alchemy SDK, Blockvision API
+- **Deployment**: Vercel
 
 ## 🚀 Quick Start
 
-### 1. Clone Repository
+### Prerequisites
+
+- Node.js 18+ 
+- npm or yarn
+- Alchemy API key
+- Blockvision API key
+
+### Installation
+
 ```bash
-git clone <repository-url>
+# Clone repository
+git clone https://github.com/yourusername/monad-wallet-checker.git
 cd monad-wallet-checker
-```
 
-### 2. Install Dependencies
-```bash
+# Install dependencies
 npm install
-```
 
-### 3. Setup Environment Variables
-Buat file `.env.local` di root directory:
-```env
-ALCHEMY_API_KEY=your_alchemy_api_key_here
-```
+# Set up environment variables
+cp .env.example .env.local
+# Edit .env.local with your API keys
 
-**Cara mendapatkan API Key:**
-1. Kunjungi [Alchemy Dashboard](https://dashboard.alchemy.com/)
-2. Create account atau login
-3. Buat app baru dan pilih network **Monad Testnet**
-4. Copy API key ke file `.env.local`
-
-### 4. Run Development Server
-```bash
+# Run development server
 npm run dev
 ```
 
-Buka [http://localhost:3000](http://localhost:3000) di browser.
+### Environment Variables
 
-## 🔧 Tech Stack
+Create `.env.local` file with:
 
-- **Frontend**: Next.js 15, React 19, TypeScript
-- **Styling**: Tailwind CSS 4
-- **Blockchain**: Ethers.js, Alchemy SDK
-- **Icons**: React Icons (Feather)
-- **HTTP Client**: Axios
+```env
+# Alchemy API Key untuk Monad Testnet
+ALCHEMY_API_KEY=your_alchemy_api_key_here
 
-## 📱 Cara Penggunaan
+# Blockvision API Key untuk NFT data
+BLOCKVISION_API_KEY=31oQM4udr0oty6ywiMD2ZUIxPMl
 
-### 1. Cek Alamat Wallet
-- Masukkan alamat wallet (0x...) di kolom pencarian
-- Klik tombol search untuk menganalisis
-- Lihat informasi:
-  - Saldo MON saat ini dan historis
-  - Transaction count (nonce)
-  - Tipe alamat (EOA atau Smart Contract)
-  - Storage data (untuk smart contract)
-
-### 2. Cek Hash Transaksi
-- Masukkan hash transaksi (0x...) di kolom kedua
-- Klik search untuk melihat detail:
-  - Status transaksi (Success/Failed)
-  - Block number
-  - Alamat pengirim dan penerima
-  - Value dan biaya transaksi
-
-### 3. View NFTs dan Tokens
-- NFT dan token akan ditampilkan otomatis setelah search wallet
-- NFT ditampilkan dalam bentuk gallery dengan gambar preview
-- Token balance menampilkan semua ERC-20 token yang dimiliki
-
-## 🏗️ Struktur Project
-
-```
-src/
-├── app/
-│   ├── api/                 # API Routes
-│   │   ├── check-wallet/    # Endpoint untuk data wallet
-│   │   ├── get-nfts/       # Endpoint untuk NFT data
-│   │   ├── get-tokens/     # Endpoint untuk token balance
-│   │   └── get-tx/         # Endpoint untuk transaction data
-│   ├── layout.tsx          # Root layout
-│   ├── page.tsx            # Homepage
-│   └── globals.css         # Global styles
-└── components/
-    └── DashboardCard.tsx   # Reusable card component
-```
-
-## 🔌 API Endpoints
-
-### GET `/api/check-wallet?address=0x...`
-Mengambil informasi wallet dan jaringan.
-
-### GET `/api/get-nfts?address=0x...`
-Mengambil daftar NFT yang dimiliki wallet.
-
-### GET `/api/get-tokens?address=0x...`
-Mengambil balance semua token ERC-20.
-
-### GET `/api/get-tx?hash=0x...`
-Mengambil detail transaksi berdasarkan hash.
-
-## 🛠️ Development
-
-### Build untuk Production
-```bash
-npm run build
-```
-
-### Start Production Server
-```bash
-npm start
-```
-
-### Linting
-```bash
-npm run lint
+# Monad RPC URL (optional, fallback)
+NEXT_PUBLIC_MONAD_RPC_URL=https://rpc.testnet.monad.xyz
 ```
 
 ## 🌐 Deployment
 
-Aplikasi ini dapat di-deploy ke platform manapun yang support Next.js:
+### Deploy to Vercel
 
-- **Vercel** (Recommended)
-- **Netlify**
-- **Railway**
-- **AWS Amplify**
+1. **Push to GitHub**:
+   ```bash
+   git add .
+   git commit -m "Initial commit"
+   git push origin main
+   ```
 
-Pastikan untuk set environment variable `ALCHEMY_API_KEY` di platform deployment.
+2. **Connect to Vercel**:
+   - Go to [vercel.com](https://vercel.com)
+   - Import your GitHub repository
+   - Add environment variables in Vercel dashboard
 
-## 🔒 Security Notes
+3. **Environment Variables in Vercel**:
+   - Go to Project Settings → Environment Variables
+   - Add the same variables from `.env.local`
 
-- API key disimpan sebagai server-side environment variable
-- Tidak ada data sensitif yang di-expose ke client
-- Semua request blockchain melalui proxy API internal
+### API Endpoints
+
+The application includes several API routes:
+
+- `/api/check-wallet` - Wallet information and balance
+- `/api/get-tokens` - Token balances using Alchemy
+- `/api/get-nfts-blockvision` - NFT data from Blockvision
+- `/api/get-nfts` - NFT data using event scanning
+- `/api/get-tx` - Transaction details
+- `/api/wallet-stats` - Comprehensive wallet statistics
+
+## 🎯 Usage
+
+1. **Wallet Explorer**: Enter any Ethereum address to view comprehensive wallet data
+2. **Transaction Lookup**: Search for transaction hashes to get detailed information
+3. **Real-time Data**: All data is fetched live from Monad testnet
+
+## 🔧 Development
+
+```bash
+# Development
+npm run dev
+
+# Build
+npm run build
+
+# Production
+npm start
+
+# Lint
+npm run lint
+```
+
+## 📱 Features Overview
+
+### Wallet Analytics
+- Balance tracking
+- Transaction history
+- Token portfolio
+- NFT collection
+- Network status
+
+### Transaction Details
+- Hash verification
+- Block information
+- Gas fees
+- Status tracking
+
+### NFT Integration
+- Blockvision API for comprehensive NFT data
+- Collection verification
+- Activity tracking
+- Image display
 
 ## 🤝 Contributing
 
-1. Fork repository
-2. Create feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open Pull Request
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
 
 ## 📄 License
 
-MIT License - Lihat file [LICENSE](LICENSE) untuk detail.
+MIT License - see LICENSE file for details
 
-## 📞 Support
+## 👨‍💻 Developer
 
-Jika ada pertanyaan atau issue, silakan buat [GitHub Issue](../../issues) atau contact developer.
+Built with ❤️ by [@ipvdan](https://twitter.com/ipvdan)
 
 ---
 
-**Happy Exploring! 🚀**
+**Status**: Actively maintained and updated for Monad testnet
