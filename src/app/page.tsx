@@ -363,7 +363,7 @@ export default function HomePage() {
           </div>
 
           <h1 className="text-4xl sm:text-6xl font-bold text-white mb-6">
-            Explore <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">JAV</span>nad ( Java Monad )
+            Explore <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">JAVA</span>nad Analytics
           </h1>
 
           <p className="text-xl text-gray-400 max-w-2xl mx-auto mb-8">
@@ -398,8 +398,8 @@ export default function HomePage() {
                   setTxInfo(null);
                 }}
                 className={`px-6 py-3 rounded-xl font-semibold transition-all duration-200 flex items-center gap-3 ${activeTab === 'wallet'
-                    ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg'
-                    : 'text-gray-400 hover:text-gray-200 hover:bg-white/5'
+                  ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg'
+                  : 'text-gray-400 hover:text-gray-200 hover:bg-white/5'
                   }`}
               >
                 <FiKey className="w-5 h-5" />
@@ -412,8 +412,8 @@ export default function HomePage() {
                   // Keep wallet data when switching tabs
                 }}
                 className={`px-6 py-3 rounded-xl font-semibold transition-all duration-200 flex items-center gap-3 ${activeTab === 'transaction'
-                    ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg'
-                    : 'text-gray-400 hover:text-gray-200 hover:bg-white/5'
+                  ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg'
+                  : 'text-gray-400 hover:text-gray-200 hover:bg-white/5'
                   }`}
               >
                 <FiActivity className="w-5 h-5" />
@@ -765,8 +765,8 @@ export default function HomePage() {
                           {/* Badges */}
                           <div className="absolute top-2 right-2 flex gap-1">
                             <span className={`px-2 py-1 text-xs rounded-full font-medium backdrop-blur-sm ${nftProvider === 'blockvision'
-                                ? 'bg-blue-500/80 text-white'
-                                : 'bg-purple-500/80 text-white'
+                              ? 'bg-blue-500/80 text-white'
+                              : 'bg-purple-500/80 text-white'
                               }`}>
                               {nftProvider === 'blockvision' ? 'BV' : 'AL'}
                             </span>
@@ -863,8 +863,8 @@ export default function HomePage() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4">
                         <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${txInfo.status === 'Success'
-                            ? 'bg-green-500/20 text-green-400'
-                            : 'bg-red-500/20 text-red-400'
+                          ? 'bg-green-500/20 text-green-400'
+                          : 'bg-red-500/20 text-red-400'
                           }`}>
                           <span className="text-2xl">
                             {txInfo.status === 'Success' ? '✓' : '✗'}
